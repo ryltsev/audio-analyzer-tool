@@ -2,6 +2,7 @@
 
 import sys
 import tempfile
+from typing import Generator
 import pytest
 import numpy as np
 import soundfile as sf
@@ -13,7 +14,7 @@ sys.path.insert(0, str(project_root))
 
 
 @pytest.fixture
-def mock_dialog_file():
+def mock_dialog_file() -> Generator[str, None, None]:
     """Создает временный файл с тестовыми диалоговыми данными.
     
     Фикстура для создания реалистичного диалогового аудио файла

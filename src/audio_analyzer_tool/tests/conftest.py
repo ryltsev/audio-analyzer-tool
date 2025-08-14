@@ -1,13 +1,14 @@
 """Конфигурация pytest для тестов аудио анализатора."""
 
 import tempfile
+from typing import Tuple, Generator
 import pytest
 import numpy as np
 import soundfile as sf
 
 
 @pytest.fixture
-def sample_audio_data():
+def sample_audio_data() -> Tuple[np.ndarray, int]:
     """Создает тестовые аудио данные.
     
     Фикстура для создания базовых тестовых аудио данных для аудио анализатора.
@@ -32,7 +33,7 @@ def sample_audio_data():
 
 
 @pytest.fixture
-def temp_audio_file(sample_audio_data):
+def temp_audio_file(sample_audio_data: Tuple[np.ndarray, int]) -> str:
     """Создает временный аудио файл для тестов.
     
     Фикстура для создания временного WAV файла на основе sample_audio_data.
@@ -46,7 +47,7 @@ def temp_audio_file(sample_audio_data):
 
 
 @pytest.fixture
-def mock_dialog_file():
+def mock_dialog_file() -> str:
     """Создает временный файл с тестовыми диалоговыми данными.
     
     Фикстура для создания реалистичного диалогового аудио файла

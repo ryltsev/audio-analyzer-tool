@@ -4,7 +4,7 @@ from src.audio_analyzer_tool import AudioDialogAnalyzer, ReactionTimeResult, Dia
 
 
 @allure.title("Базовый пример анализа одной реплики")
-def test_basic_example(mock_dialog_file):
+def test_basic_example(mock_dialog_file: str) -> None:
     analyzer = AudioDialogAnalyzer()
     
     result = analyzer.analyze_dialog_turn(mock_dialog_file, 3.250, 8.432)
@@ -13,7 +13,7 @@ def test_basic_example(mock_dialog_file):
 
 
 @allure.title("Пример анализа нескольких реплик с вычислением статистики")  
-def test_multiple_turns_example(mock_dialog_file):
+def test_multiple_turns_example(mock_dialog_file: str) -> None:
     analyzer = AudioDialogAnalyzer()
     
     # Временные метки реплик абонента - передаем списком кортежей

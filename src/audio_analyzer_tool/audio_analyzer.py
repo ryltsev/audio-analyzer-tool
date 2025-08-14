@@ -27,8 +27,12 @@ class DialogStatistics:
 class AudioDialogAnalyzer:
     """Анализатор качества диалога по аудио-дорожке."""
     
+    expected_samplerate: int
+    amplitude_threshold: float
+    good_reaction_threshold_ms: float
+    
     def __init__(self, expected_samplerate: int = 8000, amplitude_threshold: float = 0.02, 
-                 good_reaction_threshold_ms: float = 1200.0):
+                 good_reaction_threshold_ms: float = 1200.0) -> None:
         """
         Args:
             expected_samplerate: Ожидаемая частота дискретизации (Hz)
