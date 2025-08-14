@@ -1,0 +1,123 @@
+---
+description: Python autotesters assistant — guidance for writing, structuring and improving automated tests using pytest
+globs:
+  - tests/*.py
+  - src/**/*.py
+alwaysApply: true
+---
+
+### Key Principles
+- Write **concise**, **technical** responses with accurate and runnable Python examples.
+- Prioritize **readability**, **maintainability**, and **clear test intent**.
+- Use **descriptive test names** and maintain **test independence**.
+- Follow **PEP 8** style for code in tests and fixtures.
+
+### Testing Patterns & Structure
+- Organize tests in a `tests/` directory, mirroring project structure (`tests/test_module.py` for `src/module.py`).
+- Use `pytest`.
+- Each test should focus on **one behavior or scenario** — don’t combine multiple concerns.
+- Use **fixtures** for setup and teardown; keep them minimal and relevant.
+
+### Naming Conventions
+- Test function names should clearly state intent, e.g. `def test_user_creation_valid_input():`.
+- Use parameterized tests via `@pytest.mark.parametrize` to avoid duplication while increasing readability.
+
+### Assertions & Validation
+- Use expressive `assert` statements with **descriptive error messages** (`assert result == expected, f"Expected {expected}, got {result}"`, `assert "error" in str(exc.value), "Error message not found in exception"`).
+- **MANDATORY: Every assert statement MUST include a descriptive error message** explaining what went wrong and showing actual vs expected values.
+- Prefer **black box testing** — assert behavior, not implementation details.
+- Avoid overly brittle assertions (e.g., exact timestamps or memory addresses).
+- Format assert messages using f-strings to include variable values: `assert condition, f"Description: expected {expected}, actual {actual}"`
+- Use pydantic for
+
+### Fixtures & Mocks
+- Use `pytest` fixtures for reusable setup (`def user_fixture(): return User(...)`).
+- Leverage **monkeypatch** or `unittest.mock` for mocking external dependencies (e.g., HTTP calls, DB).
+- Explicitly scope fixtures (`function`, `module`, `session`) according to reuse needs — default to `function`.
+
+### Fixture Organization & Scope
+- **ALWAYS organize fixtures by scope and reusability**:
+  - **Global fixtures** (используются в любых тестах) → `tests/conftest.py` (например, получение хоста, базовые настройки)
+  - **Module-specific fixtures** (для группы связанных тестов) → `tests/test_module_name/conftest.py` 
+  - **Class-specific fixtures** (для одного тестового класса) → `tests/test_module_name/conftest.py`
+  - **Method-specific fixtures** (только для одного теста) → `tests/test_module_name/conftest.py`
+- **Fixture placement rules**:
+  - Универсальные фикстуры (хост, токены, базовые объекты) → корневой `tests/conftest.py`
+  - Фикстуры для тестирования конкретного модуля → `tests/test_module_name/conftest.py`
+  - Фикстуры для конкретного класса тестов → `tests/test_module_name/conftest.py`
+  - Фикстуры только для одного теста → `tests/test_module_name/conftest.py`
+  - Создавать папочную структуру conftest.py файлов по мере необходимости
+- **Always clean up imports** after moving fixtures (remove unused `import tempfile`, `import numpy`, etc.)
+- **Fixture naming**: Use descriptive names that indicate purpose (`mock_dialog_file`, `sample_audio_data`)
+- **Fixture documentation**: Document fixture purpose and scope in docstrings
+
+### Parametrization & Coverage
+- Use `@pytest.mark.parametrize` for testing multiple input/output combinations:
+  ```python
+  @pytest.mark.parametrize("input,expected", [
+      (1, 2),
+      (2, 3),
+  ])
+  def test_increment(input, expected):
+      assert increment(input) == expected
+- Aim for good coverage, especially on edge cases and error conditions.
+
+### Test Quality & Maintenance
+- Keep tests fast — avoid expensive operations or external network calls unless essential.
+- Mark slow or flaky tests with @pytest.mark.skip or @pytest.mark.flaky and document why.
+- Use descriptive messages in pytest.xfail(reason="…") or pytest.skip(reason="…").
+
+### Documentation & Reporting
+- Include docstrings or inline comments explaining the purpose of complex tests.
+- **Use Allure reporting ONLY for tests in root `tests/` directory** for better test documentation and reporting:
+  - Import `allure` in test files located in root `tests/` directory
+  - Use `@allure.title()` with descriptive titles in Russian/English for root tests
+  - Use `@allure.step()` for complex test scenarios in root tests
+  - **Do NOT use Allure for tests inside `src/` packages (e.g., `src/package/tests/`)**
+- Add `allure-pytest>=2.13.0` to requirements.txt only when using Allure
+- Suggest using linters like flake8 or pytest-check to enforce test code quality.
+
+### Directory Structure
+- Use `src/` directory for all source code modules and utilities
+- Use `tests/` directory for all test files, mirroring `src/` structure
+- Place `__init__.py` files in both `src/` and `tests/` directories
+- Use `tests/conftest.py` for pytest configuration and shared fixtures
+
+### Test Organization
+- Name test files with `test_` prefix: `test_module_name.py`
+- Mirror source structure in tests: `src/module.py` → `tests/test_module.py`
+- Import from src using relative imports: `from src.module_name import ClassName`
+- NO `main.py` files for pytest-based projects - run tests directly with `pytest`
+
+### Import Conventions
+- Use relative imports within packages: `from .module import Class`
+- Import from src in tests: `from src.package_name import Module`
+- Add project root to Python path in `tests/conftest.py` if needed
+
+### File Placement Rules
+- Core functionality → `src/`
+- Example usage/demos → `src/` (not root)
+- Unit tests → `tests/`
+- Integration tests → `tests/`
+- Configuration files → project root
+- Documentation → project root or `docs/`
+
+### What NOT to create
+- Avoid `main.py` for test-driven projects
+- Don't mix tests with source code in same directory
+- Don't put utilities/examples in project root
+
+### CRITICAL: Test Output Rules
+- **🚫 FORBIDDEN: Any `print()`, `console.log()`, or debug output in test functions**
+- **✅ REQUIRED: Only `assert` statements for test validations**
+- **✅ REQUIRED: Every test must have at least one meaningful assertion**
+- **✅ REQUIRED: Tests must fail with clear messages when assertions fail**
+- **✅ MANDATORY: Every `assert` statement MUST include descriptive error message with actual values**
+- **✅ REQUIRED: Assert messages should use f-strings to show expected vs actual values**
+
+### Automated Enforcement
+- Configure linter to flag `print()` in test files
+- Add pre-commit hook to reject tests without assertions
+- Use static analysis to ensure test coverage includes assertions
+- **CRITICAL: Enforce that all `assert` statements include error messages** - reject commits with bare asserts in test files
+- Add linting rule to flag `assert condition` without `, "message"` in test files
